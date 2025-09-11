@@ -4,17 +4,6 @@ from io import BytesIO
 from PIL import Image
 import os
 
-# Vérifier si openpyxl est présent (message utilisateur clair si absent)
-try:
-    import openpyxl  # noqa: F401
-except Exception:
-    st.error(
-        "Le package 'openpyxl' n'est pas installé.\n\n"
-        "Installe-le avec : `python -m pip install openpyxl` "
-        "ou ajoute `openpyxl` à ton requirements.txt si tu utilises Streamlit Cloud."
-    )
-    st.stop()
-
 # Configuration de la page
 st.set_page_config(page_title="Convertisseur Email", page_icon="📧", layout="centered")
 
@@ -111,3 +100,4 @@ if uploaded_file is not None:
             st.error("❌ Colonnes manquantes dans le fichier importé. Vérifiez le format.")
     except Exception as e:
         st.error(f"Erreur lors de la lecture du fichier : {e}")
+
