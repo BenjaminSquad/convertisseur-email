@@ -84,12 +84,6 @@ if uploaded_file is not None:
             output.seek(0)
 
             st.success("✅ Fichier converti avec succès !")
-
-            # 🔹 Affichage d’un aperçu des 5 premières lignes
-            st.markdown("### 👀 Aperçu des 5 premières lignes générées")
-            st.dataframe(df[["fusion"]].head(5))
-
-            # Bouton de téléchargement
             st.download_button(
                 label="📥 Télécharger le CSV final",
                 data=output,
