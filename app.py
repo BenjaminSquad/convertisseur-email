@@ -4,11 +4,22 @@ from io import BytesIO
 from PIL import Image
 import os
 
+# Vérifier si openpyxl est présent (message utilisateur clair si absent)
+try:
+    import openpyxl  # noqa: F401
+except Exception:
+    st.error(
+        "Le package 'openpyxl' n'est pas installé.\n\n"
+        "Installe-le avec : `python -m pip install openpyxl` "
+        "ou ajoute `openpyxl` à ton requirements.txt si tu utilises Streamlit Cloud."
+    )
+    st.stop()
+
 # Configuration de la page
 st.set_page_config(page_title="Convertisseur Email", page_icon="📧", layout="centered")
 
 # Chargement du logo (robuste)
-logo_path = "logo.png"  # Assure-toi que ton fichier s'appelle bien logo.png (sans espace) et qu'il est dans ton repo
+logo_path = "logo.png"
 if os.path.exists(logo_path):
     try:
         img = Image.open(logo_path)
@@ -22,7 +33,6 @@ else:
 st.markdown("## Convertisseur Email")
 st.markdown("Bienvenue sur l’outil **Convertisseur Email** 🎯")
 
-# 🔹 Bloc consignes (mis à jour)
 st.markdown(
     """
     <div style="background-color:#f0f2f6; padding:15px; border-radius:10px; margin-bottom:20px;">
@@ -45,21 +55,21 @@ uploaded_file = st.file_uploader("Déposez un fichier Excel exporté de Squadeas
 
 if uploaded_file is not None:
     try:
-        # Lecture du fichier
-        df = pd.read_excel(uploaded_file)
+        # Forcer l'utilisation d'openpyxl comme engine
+        df = pd.read_excel(uploaded_file, engine="openpyxl")
 
         # Vérif colonnes obligatoires
         colonnes_requises = ["Nom adhérent", "Prénom adhérent", "Email payeur", "langue", "profil"]
         if all(col in df.columns for col in colonnes_requises):
-            
+
             # Renommer les colonnes
             df = df.rename(columns={
                 "Nom adhérent": "nom",
                 "Prénom adhérent": "prénom",
                 "Email payeur": "email"
             })
-            
-            # Cas où la colonne "entité" existe
+
+            # Gérer présence de la colonne 'entité'
             if "entité" in df.columns:
                 df["fusion"] = (
                     df["nom"].astype(str) + "," +
@@ -85,7 +95,7 @@ if uploaded_file is not None:
 
             st.success("✅ Fichier converti avec succès !")
 
-            # 🔹 Affichage d’un aperçu des 5 premières lignes
+            # Affichage d’un aperçu des 5 premières lignes
             st.markdown("### 👀 Aperçu des 5 premières lignes générées")
             st.dataframe(df[["fusion"]].head(5))
 
@@ -99,6 +109,5 @@ if uploaded_file is not None:
 
         else:
             st.error("❌ Colonnes manquantes dans le fichier importé. Vérifiez le format.")
-    
     except Exception as e:
         st.error(f"Erreur lors de la lecture du fichier : {e}")
