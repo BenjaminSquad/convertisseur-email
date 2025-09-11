@@ -22,7 +22,7 @@ else:
 st.markdown("## Convertisseur Email")
 st.markdown("Bienvenue sur l’outil **Convertisseur Email** 🎯")
 
-# 🔹 Bloc consignes
+# 🔹 Bloc consignes (mis à jour)
 st.markdown(
     """
     <div style="background-color:#f0f2f6; padding:15px; border-radius:10px; margin-bottom:20px;">
@@ -34,8 +34,7 @@ st.markdown(
       • <b>email</b><br>
       • <b>langue</b><br>
       • <b>profil</b><br>
-    - Le fichier peut contenir d’autres colonnes (ex: <i>Date de la commande</i>), elles seront ignorées.<br>
-    - Après conversion, vous obtiendrez un fichier <b>CSV prêt à l’emploi ✅</b>
+    - Une colonne <b>entité</b> peut être présente. Si c’est le cas, elle sera incluse automatiquement dans le CSV final ✅
     </div>
     """,
     unsafe_allow_html=True
@@ -49,7 +48,7 @@ if uploaded_file is not None:
         # Lecture du fichier
         df = pd.read_excel(uploaded_file)
 
-        # Vérif colonnes
+        # Vérif colonnes obligatoires
         colonnes_requises = ["Nom adhérent", "Prénom adhérent", "Email payeur", "langue", "profil"]
         if all(col in df.columns for col in colonnes_requises):
             
@@ -60,14 +59,24 @@ if uploaded_file is not None:
                 "Email payeur": "email"
             })
             
-            # Fusion en une seule colonne
-            df["fusion"] = (
-                df["nom"].astype(str) + "," +
-                df["prénom"].astype(str) + "," +
-                df["email"].astype(str) + "," +
-                df["langue"].astype(str) + "," +
-                df["profil"].astype(str)
-            )
+            # Cas où la colonne "entité" existe
+            if "entité" in df.columns:
+                df["fusion"] = (
+                    df["nom"].astype(str) + "," +
+                    df["prénom"].astype(str) + "," +
+                    df["email"].astype(str) + "," +
+                    df["langue"].astype(str) + "," +
+                    df["profil"].astype(str) + "," +
+                    df["entité"].astype(str)
+                )
+            else:
+                df["fusion"] = (
+                    df["nom"].astype(str) + "," +
+                    df["prénom"].astype(str) + "," +
+                    df["email"].astype(str) + "," +
+                    df["langue"].astype(str) + "," +
+                    df["profil"].astype(str)
+                )
 
             # Préparer fichier CSV
             output = BytesIO()
@@ -87,4 +96,3 @@ if uploaded_file is not None:
     
     except Exception as e:
         st.error(f"Erreur lors de la lecture du fichier : {e}")
-
